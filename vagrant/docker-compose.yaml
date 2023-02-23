@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:debian
+    container_name: converter_db
+    ports:
+      - 3308:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=converter_db
+    restart: always
+
+  phpmyadmin:
+    depends_on:
+      - mysql
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    ports:
+      - "8080:80"
+  
+  converter:
+    image: roretar/back-end-converter:puchero 
+    container_name: converter_api
+    ports:
+      - 5000:5000
+    environment:
+      - CONVERTER_HOST_ALL=0.0.0.0
+      - CONVERTER_HOST=192.168.56.10
+      - DB_HOST=172.17.0.1
+    depends_on:
+      - mysql
+    restart: always
+
+  web_converter:
+    image: roretar/front-end-converter:bandeja_paisa
+    container_name: front_end_converter
+    ports:
+      - 5017:5017
+    depends_on:
+      - converter
+    restart: always
