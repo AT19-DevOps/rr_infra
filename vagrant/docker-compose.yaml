@@ -44,3 +44,59 @@ services:
     depends_on:
       - converter
     restart: always
+  
+  mongo:
+    image: mongo:latest
+    container_name: machine_db
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_volume:/data/db 
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=123
+    restart: always
+    command: ['--auth']
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=123
+      - ME_CONFIG_MONGODB_SERVER=mongo
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongo
+
+  machine-learning:
+    image: telmarf/machine-learning:anticucho
+    container_name: machine_servece
+    volumes:
+      - machine_volume:/root/.deepface/weights
+    environment:
+      - URI='mongodb://root:123@mongo:27017'
+    ports:
+      - 5001:5001
+    depends_on:
+      - mongo
+    restart: always
+  
+  front_end_machine:
+    image: telmarf/front_machine:cuchuco
+    container_name: front_machi
+    environment:
+      - URL=http://172.17.0.1:5001
+    ports:
+      - 8000:8000
+    restart: always
+    depends_on:
+      - machine-learning
+  
+volumes:
+  mongo_volume: 
+    external: false
+  machine_volume:
+    external: false
+  
