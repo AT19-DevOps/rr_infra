@@ -13,5 +13,6 @@ Vagrant.configure("2") do |config|
     ds.vm.hostname = 'dshostroger'
     ds.vm.provision :file, source:"../docker/docker-compose.yaml", destination:"docker-compose.yaml"
     ds.vm.provision :docker_compose, yml:"/home/vagrant/docker-compose.yaml", run:"always"
+    ds.vm.provision :shell, inline:"chmod 777 /var/run/docker.sock && chmod 777 /usr/bin/docker"
   end
 end
